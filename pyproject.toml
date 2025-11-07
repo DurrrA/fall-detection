@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "fall-detection-project"
+version = "0.1.0"
+description = "A fall detection system using machine learning and real-time video processing."
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+opencv-python = "^4.5.3"
+tensorflow = "^2.6.0"
+numpy = "^1.21.0"
+pandas = "^1.3.0"
+scikit-learn = "^0.24.2"
+flask = "^2.0.1"
+requests = "^2.26.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
