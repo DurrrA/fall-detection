@@ -32,21 +32,19 @@ def make_tf_data(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-root", type=str, default="data/fall_dataset")
     parser.add_argument("--image-dir", type=str, default="images")
     parser.add_argument("--epochs", type=int, default=15)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--val-split", type=float, default=0.2)
     parser.add_argument("--img-size", type=int, nargs=2, default=[224, 224])
-    parser.add_argument("--models-dir", type=str, default="models")
     parser.add_argument("--weights", type=str, default="imagenet", help="imagenet or none")
     parser.add_argument("--train-base", action="store_true", help="Unfreeze base (fine-tune)")
     parser.add_argument("--no-augment", action="store_true", help="Disable data augmentation")
     args = parser.parse_args()
 
-    dataset_root = Path(args.data_root)
-    models_dir = Path(args.models_dir)
+    dataset_root = Path("data/fall_dataset")
+    models_dir = Path("models")
     models_dir.mkdir(parents=True, exist_ok=True)
 
     class_names = get_class_names(dataset_root, args.image_dir)
@@ -111,7 +109,6 @@ def main():
         class_weight=class_weight,
     )
 
-    # Save labels and final model
     labels_json = {str(i): name for i, name in enumerate(class_names)}
     (models_dir / "labels.json").write_text(json.dumps(labels_json, indent=2))
     model.save((models_dir / "last.keras").as_posix())

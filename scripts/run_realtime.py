@@ -24,6 +24,28 @@ def find_fall_index(labels: list[str]) -> int:
             return i
     return 0
 
+def parse_threshold(th_raw, default: float = 0.6) -> float:
+    # Accept float, numeric string, or path to a JSON file with best_threshold_fall/threshold
+    if isinstance(th_raw, (int, float)):
+        return float(th_raw)
+    s = str(th_raw)
+    p = Path(s)
+    if p.exists():
+        try:
+            data = json.loads(p.read_text())
+            for k in ("best_threshold_fall", "threshold", "best_threshold"):
+                if k in data:
+                    return float(data[k])
+            print(f"Warning: no threshold key in {p}, using default {default}")
+            return default
+        except Exception as e:
+            print(f"Warning: failed to read threshold from {p}: {e}; using default {default}")
+            return default
+    try:
+        return float(s)
+    except ValueError:
+        print(f"Warning: invalid threshold '{s}', using default {default}")
+        return default
 
 def resolve_source(source_str: str) -> int | str:
     # Webcam index
@@ -53,7 +75,7 @@ def main():
     parser.add_argument("--labels", type=str, default="models/labels.json")
     parser.add_argument("--source", type=str, default="0", help="0 for webcam or path to video")
     parser.add_argument("--img-size", type=int, nargs=2, default=[224, 224])
-    parser.add_argument("--threshold", type=float, default=0.6, help="probability threshold")
+    parser.add_argument("--threshold", type=str, default="0.6", help="float or path to metrics.json")
     parser.add_argument("--smooth", type=float, default=0.8, help="EMA smoothing factor (0..1)")
     parser.add_argument("--min-frames", type=int, default=3, help="consecutive frames to trigger")
     parser.add_argument("--latch-sec", type=float, default=2.0, help="keep FALL overlay this many seconds")
@@ -62,6 +84,8 @@ def main():
     model = tf.keras.models.load_model(args.checkpoint)
     labels = load_labels(Path(args.labels))
     fall_idx = find_fall_index(labels)
+    threshold = parse_threshold(args.threshold)
+    print(f"Using threshold: {threshold}")
 
     src = resolve_source(args.source)
     print(f"Opening source: {src}")
@@ -99,13 +123,13 @@ def main():
 
         alpha = float(np.clip(args.smooth, 0.0, 1.0))
         smoothed = alpha * smoothed + (1.0 - alpha) * p_fall
-        if smoothed >= args.threshold:
+        if smoothed >= threshold:
             consec += 1
         else:
             consec = 0
 
         now = time.time()
-        triggered = (consec >= args.min_frames) or (pred_idx == fall_idx and smoothed >= args.threshold)
+        triggered = (consec >= args.min_frames) or (pred_idx == fall_idx and smoothed >= threshold)
         if triggered:
             last_trigger = now
             if not last_print_state:

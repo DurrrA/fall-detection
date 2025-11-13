@@ -6,7 +6,7 @@ def create_model(
     num_classes: int = 2,
     input_shape: tuple[int, int, int] = (224, 224, 3),
     base: str = "mobilenet_v2",
-    weights: str | None = None,  # set to "imagenet" if you want pretrained and have internet
+    weights: str | None = None,  
     train_base: bool = False,
     learning_rate: float = 1e-3,
     compile_model: bool = True,

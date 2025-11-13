@@ -15,7 +15,6 @@ from .dataset import load_dataset
 def load_labels(labels_path: Path | None, class_names_from_data: list[str]) -> list[str]:
     if labels_path and labels_path.exists():
         mapping = json.loads(labels_path.read_text())
-        # ensure index-ordered list
         return [mapping[str(i)] for i in sorted(map(int, mapping.keys()))]
     return class_names_from_data
 
@@ -47,7 +46,6 @@ def main():
 
     preds = model.predict(ds, verbose=0)
     if preds.ndim == 2 and preds.shape[1] == 1:
-        # binary sigmoid -> convert to 2-class indices [0,1]
         y_pred = (preds.ravel() >= 0.5).astype("int32")
     else:
         y_pred = np.argmax(preds, axis=1).astype("int32")
@@ -59,7 +57,6 @@ def main():
     print(f"Accuracy: {acc:.4f}")
     print(report)
 
-    # Save artifacts
     (results_dir / "metrics.json").write_text(json.dumps({"accuracy": float(acc)}, indent=2))
     fig, ax = plt.subplots(figsize=(5, 5))
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
