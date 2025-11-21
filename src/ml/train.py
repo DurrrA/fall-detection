@@ -2,14 +2,15 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-import numpy as np
-import tensorflow as tf
+import os, random, numpy as np, tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from .dataset import load_dataset
 from .model import create_model
 
 AUTOTUNE = tf.data.AUTOTUNE
+SEED = 42
+random.seed(SEED); np.random.seed(SEED); tf.random.set_seed(SEED); os.environ["PYTHONHASHSEED"]=str(SEED)
 
 def get_class_names(dataset_root: Path, image_dir: str) -> list[str]:
     data_dir = (dataset_root / image_dir)
@@ -37,6 +38,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--val-split", type=float, default=0.2)
+    parser.add_argument("--test-split", type=float, default=0.2)
     parser.add_argument("--img-size", type=int, nargs=2, default=[224, 224])
     parser.add_argument("--weights", type=str, default="imagenet", help="imagenet or none")
     parser.add_argument("--train-base", action="store_true", help="Unfreeze base (fine-tune)")
@@ -54,9 +56,15 @@ def main():
 
     # Load and split
     X, y = load_dataset(dataset_root, image_dir=args.image_dir, img_size=tuple(args.img_size), normalize=False)
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=args.val_split, random_state=42, stratify=y
+
+    X_temp, X_test, y_temp, y_test = train_test_split(
+        X, y, test_size=args.test_split, random_state=SEED, stratify=y
     )
+    val_ratio = args.val_split / (1.0 - args.test_split)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_temp, y_temp, test_size=val_ratio, random_state=SEED, stratify=y_temp
+    )
+    print(f"Split -> train: {len(X_train)}, val: {len(X_val)}, test: {len(X_test)}")
 
     # Class weights to counter imbalance
     uniq, cnts = np.unique(y_train, return_counts=True)

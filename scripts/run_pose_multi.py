@@ -75,13 +75,10 @@ def main():
         ok, frame = cap.read()
         if not ok:
             break
-
         poses = tracker.process(frame) or []
         for person in poses:
             draw_pose_landmarks(frame, person)
-
         any_latched, infos = multi.update(poses)
-
         now = time.time()
         if any_latched and now - last_print > 0.5:
             print("fall")

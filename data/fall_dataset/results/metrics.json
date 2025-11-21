@@ -1,3 +1,46 @@
 {
-  "accuracy": 0.9791304347826087
+  "device": "CPU",
+  "accuracy": 0.9182608695652174,
+  "balanced_accuracy": 0.9264269594543195,
+  "mcc": 0.8378407143299805,
+  "kappa": 0.8327257196972042,
+  "per_class": [
+    {
+      "class": "fall",
+      "precision": 0.9748427672955975,
+      "recall": 0.8882521489971347,
+      "f1": 0.9295352323838081,
+      "support": 349
+    },
+    {
+      "class": "not-fall",
+      "precision": 0.8482490272373541,
+      "recall": 0.9646017699115044,
+      "f1": 0.9026915113871635,
+      "support": 226
+    }
+  ],
+  "confusion_details": [
+    {
+      "class": "fall",
+      "tp": 310,
+      "tn": 218,
+      "fp": 8,
+      "fn": 39,
+      "sensitivity": 0.8882521489971347,
+      "specificity": 0.9646017699115044
+    },
+    {
+      "class": "not-fall",
+      "tp": 218,
+      "tn": 310,
+      "fp": 39,
+      "fn": 8,
+      "sensitivity": 0.9646017699115044,
+      "specificity": 0.8882521489971347
+    }
+  ],
+  "roc_auc": 0.9749347059867637,
+  "avg_precision": 0.9812258663301607,
+  "best_threshold": 0.34869512915611267
 }
